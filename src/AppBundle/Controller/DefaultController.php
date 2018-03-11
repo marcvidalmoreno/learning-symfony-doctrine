@@ -87,9 +87,8 @@ class DefaultController extends Controller
      */
     public function editAction($productId)
     {
-        $product = $this->getDoctrine()
-            ->getRepository(Product::class)
-            ->find($productId);
+        $entityManager = $this->getDoctrine()->getManager();
+        $product = $entityManager->getRepository(Product::class)->find($productId);
 
         if (!$product) {
             throw $this->createNotFoundException(
@@ -97,20 +96,14 @@ class DefaultController extends Controller
             );
         }
 
-        $product->setName('Mouse');
-        $product->setPrice(2.99);
-        $product->setDescription('Wireless!');
+        $product->setName('New Product Name');
+        $product->setPrice(5.99);
 
-        // gets Doctrine's Entity Manager
-        $entityManager = $this->getDoctrine()->getManager();
-
-        // tells Doctrine you want to (eventually) save the Product (no queries yet)
-        $entityManager->persist($product);
 
         // actually executes the queries (i.e. the UPDATE query)
         $entityManager->flush();
 
-        return new Response('Edited product with id '.$product->getId());
+        return $this->redirectToRoute('homepage');
     }
 
     /**
@@ -136,6 +129,9 @@ class DefaultController extends Controller
         // finds *all* products
         $products = $repository->findAll();
 
+        echo '<pre>';
+        die(print_r($products));
+
         // looks for a single product matching the given name and price
         $product = $repository->findOneBy(
             array('name' => 'Keyboard', 'price' => 19.99)
@@ -146,8 +142,5 @@ class DefaultController extends Controller
             array('name' => 'Keyboard'),
             array('price' => 'ASC')
         );
-
-        echo '<pre>';
-        die(print_r($products));
     }
 }
