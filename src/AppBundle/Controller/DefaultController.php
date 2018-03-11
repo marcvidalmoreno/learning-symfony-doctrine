@@ -143,4 +143,26 @@ class DefaultController extends Controller
             array('price' => 'ASC')
         );
     }
+
+    /**
+     * @Route("/remove/{productId}", name="remove_product")
+     */
+    public function removeAction($productId)
+    {
+        $entityManager = $this->getDoctrine()->getManager();
+        $product = $entityManager->getRepository(Product::class)->find($productId);
+
+        if (!$product) {
+            throw $this->createNotFoundException(
+                'No product found for id '.$productId
+            );
+        }
+        $idProduct = $product->getId();
+        $entityManager->remove($product);
+
+        // actually executes the queries (DELETE query)
+        $entityManager->flush();
+
+        return new Response('Deleted product with id '. $idProduct);
+    }
 }
