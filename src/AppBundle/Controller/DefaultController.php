@@ -111,7 +111,43 @@ class DefaultController extends Controller
         $entityManager->flush();
 
         return new Response('Edited product with id '.$product->getId());
+    }
 
+    /**
+     * @Route("/queries/{productId}", name="queries_product")
+     */
+    public function queriesAction($productId)
+    {
+        $repository = $this->getDoctrine()->getRepository(Product::class);
 
+        // looks for a single product by its primary key (usually "id")
+        $product = $repository->find($productId);
+
+        // dynamic method names to find a single product based on a column value
+        $product = $repository->findOneById($productId);
+        $product = $repository->findOneByName('Keyboard');
+
+        // dynamic method names to find all products based on a column value
+        $product = $repository->findByName('Keyboard');
+
+        // dynamic method names to find a group of products based on a column value
+        $products = $repository->findByPrice(19.99);
+
+        // finds *all* products
+        $products = $repository->findAll();
+
+        // looks for a single product matching the given name and price
+        $product = $repository->findOneBy(
+            array('name' => 'Keyboard', 'price' => 19.99)
+        );
+
+        // looks for multiple products matching the given name, ordered by price
+        $products = $repository->findBy(
+            array('name' => 'Keyboard'),
+            array('price' => 'ASC')
+        );
+
+        echo '<pre>';
+        die(print_r($products));
     }
 }
