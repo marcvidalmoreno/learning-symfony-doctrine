@@ -82,11 +82,36 @@ class DefaultController extends Controller
         // ... do something, like pass the $product object into a template
     }
 
-    // if you have multiple entity managers, use the registry to fetch them
-    public function editAction()
+    /**
+     * @Route("/edit/{productId}", name="edit_product")
+     */
+    public function editAction($productId)
     {
-        $doctrine = $this->getDoctrine();
-        $em = $doctrine->getManager();
-        $em2 = $doctrine->getManager('other_connection');
+        $product = $this->getDoctrine()
+            ->getRepository(Product::class)
+            ->find($productId);
+
+        if (!$product) {
+            throw $this->createNotFoundException(
+                'No product found for id '.$productId
+            );
+        }
+
+        $product->setName('Mouse');
+        $product->setPrice(2.99);
+        $product->setDescription('Wireless!');
+
+        // gets Doctrine's Entity Manager
+        $entityManager = $this->getDoctrine()->getManager();
+
+        // tells Doctrine you want to (eventually) save the Product (no queries yet)
+        $entityManager->persist($product);
+
+        // actually executes the queries (i.e. the UPDATE query)
+        $entityManager->flush();
+
+        return new Response('Edited product with id '.$product->getId());
+
+
     }
 }
