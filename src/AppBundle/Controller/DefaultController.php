@@ -61,6 +61,27 @@ class DefaultController extends Controller
         return new Response('Saved new product with id '.$product->getId());
     }
 
+    /**
+     * @Route("/show/{productId}", name="show_product")
+     */
+    public function showAction($productId)
+    {
+        $product = $this->getDoctrine()
+            ->getRepository(Product::class)
+            ->find($productId);
+
+        if (!$product) {
+            throw $this->createNotFoundException(
+                'No product found for id '.$productId
+            );
+        }
+
+        echo '<pre>';
+        die(print_r($product));
+
+        // ... do something, like pass the $product object into a template
+    }
+
     // if you have multiple entity managers, use the registry to fetch them
     public function editAction()
     {
