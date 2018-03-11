@@ -48,9 +48,9 @@ class DefaultController extends Controller
         $entityManager = $this->getDoctrine()->getManager();
 
         $product = new Product();
-        $product->setName('Keyboard');
-        $product->setPrice(19.99);
-        $product->setDescription('Ergonomic and stylish!');
+        $product->setName('Table');
+        $product->setPrice(49.99);
+        $product->setDescription('Wood!');
 
         // tells Doctrine you want to (eventually) save the Product (no queries yet)
         $entityManager->persist($product);
@@ -164,5 +164,50 @@ class DefaultController extends Controller
         $entityManager->flush();
 
         return new Response('Deleted product with id '. $idProduct);
+    }
+
+    /**
+     * @Route("/doctrinequerieslanguage", name="doctrinequerieslanguage_product")
+     */
+    public function doctrinequerieslanguageAction()
+    {
+        $entityManager = $this->getDoctrine()->getManager();
+        $query = $entityManager->createQuery(
+            'SELECT p
+            FROM AppBundle:Product p
+            WHERE p.price > :price
+            ORDER BY p.price ASC'
+        )->setParameter('price', 29.99);
+
+        $product = $query->setMaxResults(1)->getOneOrNullResult();
+        echo '<pre>';
+        die(print_r($product));
+
+        $products = $query->getResult();
+        echo '<pre>';
+        die(print_r($products));
+    }
+
+    /**
+     * @Route("/doctrinequeriesbuilder", name="doctrinequeriesbuilder_product")
+     */
+    public function doctrinequeriesbuilderAction()
+    {
+        $repository = $this->getDoctrine()->getRepository(Product::class);
+
+        // createQueryBuilder() automatically selects FROM AppBundle:Product
+        // and aliases it to "p"
+        $query = $repository->createQueryBuilder('p')
+            ->where('p.price > :price')
+            ->setParameter('price', '19.99')
+            ->orderBy('p.price', 'ASC')
+            ->getQuery();
+
+        $products = $query->getResult();
+        // to get just one result:
+        // $product = $query->setMaxResults(1)->getOneOrNullResult();
+
+        echo '<pre>';
+        die(print_r($products));
     }
 }
